@@ -3,13 +3,6 @@ local M = {}
 local Job = require("plenary.job")
 local config = require("plantuml.config")
 
---- Sanitize input for shell commands
----@param input string
----@return string
-function M.sanitize_input(input)
-	return input:gsub('[;&|"]', "")
-end
-
 ---@alias command_table { command: string, args: string[]}
 
 --- Build PlantUML command
@@ -17,15 +10,13 @@ end
 ---@param output_dir string
 ---@return command_table
 function M.build_plantuml_command(input, output_dir)
-	local sanitized_input = M.sanitize_input(input)
-	local sanitized_output_dir = M.sanitize_input(output_dir)
 	return {
 		command = config.options.plantuml_path,
 		args = {
 			"-" .. config.options.output_format,
 			"-o",
-			sanitized_output_dir,
-			sanitized_input,
+			output_dir,
+			input,
 		},
 	}
 end
@@ -50,13 +41,19 @@ end
 
 ---@return string|nil
 function M.get_current_directory()
-	local handle = io.popen(vim.fn.has("win32") == 1 and "cd" or "pwd")
-	if not handle then
+	local ok, result = pcall(function()
+		local handle = io.popen(vim.fn.has("win32") == 1 and "cd" or "pwd")
+		if not handle then
+			return nil
+		end
+		local res = handle:read("*a")
+		handle:close()
+		return res:gsub("^%s*(.-)%s*$", "%1")
+	end)
+	if not ok then
 		return nil
 	end
-	local result = handle:read("*a")
-	handle:close()
-	return result:gsub("^%s*(.-)%s*$", "%1") -- Trim whitespace
+	return result
 end
 
 return M
