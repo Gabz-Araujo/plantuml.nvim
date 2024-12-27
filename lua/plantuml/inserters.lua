@@ -1,4 +1,10 @@
 local M = {}
+
+---@alias RenderResult
+---| { content: string, line_number: integer, is_image: boolean, filetype: string }
+
+---@alias RenderCallBack fun(result: RenderResult|nil)
+
 --- Insert rendered diagram into buffer
 ---@param result RenderResult
 function M.insert_rendered_diagram(result)
@@ -10,27 +16,29 @@ function M.insert_rendered_diagram(result)
 	local output_lines
 
 	if result.is_image then
+		local image_path = result.content
 		if result.filetype == "markdown" then
-			output_lines = { "![PlantUML Diagram](" .. result.content .. ")" }
+			output_lines = { "![PlantUML Diagram](" .. image_path .. ")" }
 		elseif result.filetype == "latex" or result.filetype == "tex" then
 			output_lines = {
 				"\\begin{figure}[h]",
 				"    \\centering",
-				"    \\includegraphics[width=\\textwidth]{" .. result.content .. "}",
+				"    \\includegraphics[width=\\textwidth]{" .. image_path .. "}",
 				"    \\caption{PlantUML Diagram}",
 				"    \\label{fig:plantuml_diagram}",
 				"\\end{figure}",
 			}
 		else
-			output_lines = { "PlantUML DIagram: " .. result.content }
+			output_lines = { "![PlantUML Diagram](" .. image_path .. ")" }
 		end
 	else
+		local content_lines = vim.split(result.content, "\n")
 		if result.filetype == "markdown" then
 			output_lines = { "```txt" }
-			for line in result.content:gmatch("[^\r\n]+") do
-				table.insert(output_lines, line)
-			end
+			vim.list_extend(output_lines, content_lines)
 			table.insert(output_lines, "```")
+		else
+			output_lines = content_lines
 		end
 	end
 

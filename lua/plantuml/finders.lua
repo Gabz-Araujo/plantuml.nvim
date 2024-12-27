@@ -1,5 +1,11 @@
 local M = {}
 
+local filetype_patterns = {
+	markdown = { start = "^```plantuml", ["end"] = "^```$" },
+	latex = { start = "\\begin{plantuml}", ["end"] = "\\end{plantuml}" },
+	tex = { start = "\\begin{plantuml}", ["end"] = "\\end{plantuml}" },
+}
+
 ---@class plantuml.Block
 ---@field content string
 ---@field start_line integer
@@ -7,26 +13,18 @@ local M = {}
 
 --- Find plantuml code blocks
 ---@return plantuml.Block|nil
----@return string|nil error
+---@return string|nil
 function M.find_plantuml_block()
 	local filetype = vim.bo.filetype
 	local cursor_pos = vim.api.nvim_win_get_cursor(0)
 	local current_line = cursor_pos[1]
 	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
-	local start_line, end_line = 0, 0
-	local start_pattern, end_pattern
+	local start_line, end_line = nil, nil
 
-	if filetype == "markdown" then
-		start_pattern = "^```plantuml"
-		end_pattern = "^```$"
-	elseif filetype == "latex" or filetype == "tex" then
-		start_pattern = "\\begin{plantuml}"
-		end_pattern = "\\end{plantuml}"
-	else
-		start_pattern = "@staruml"
-		end_pattern = "@enduml"
-	end
+	local patterns = filetype_patterns[filetype] or { start = "@startuml", ["end"] = "@enduml" }
+	local start_pattern = patterns.start
+	local end_pattern = patterns["end"]
 
 	for i = current_line, 1, -1 do
 		if lines[i]:match(start_pattern) then
@@ -35,8 +33,9 @@ function M.find_plantuml_block()
 		end
 	end
 
-	if start_line == 0 then
-		return nil, "No plantuml block found"
+	if start_line == nil then
+		vim.notify("No plantuml block found", vim.log.levels.ERROR)
+		return nil
 	end
 
 	for i = start_line + 1, #lines do
@@ -46,8 +45,9 @@ function M.find_plantuml_block()
 		end
 	end
 
-	if end_line == 0 then
-		return nil, "No plantuml block end found"
+	if end_line == nil then
+		vim.notify("No plantuml block found", vim.log.levels.ERROR)
+		return nil
 	end
 
 	local block_content

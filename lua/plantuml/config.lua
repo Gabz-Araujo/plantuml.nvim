@@ -1,9 +1,10 @@
+local Path = require("plenary.path")
 local M = {}
 
 M.options = {
 	plantuml_path = "plantuml",
 	output_format = "png",
-	temp_dir = vim.fn.expand("$HOME") .. "/.cache/nvim/plantuml_temp",
+	temp_dir = Path:new(vim.fn.stdpath("cache")):joinpath("nvim", "plantuml_temp").filename,
 	image_output_dir = nil,
 	format_extension_map = {
 		png = "png",
@@ -11,9 +12,9 @@ M.options = {
 		eps = "eps",
 		pdf = "pdf",
 		latex = "tex",
-		txt = "txt",
+		txt = "atxt",
 		html = "html",
-		utxt = "txt",
+		utxt = "utxt",
 		xmi = "xmi",
 	},
 }
