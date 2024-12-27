@@ -47,4 +47,9 @@ function M.insert_rendered_diagram(result)
 	end)
 end
 
+--- Display the rendered diagram on a new buffer
+function M.display_image_in_buffer()
+	return error("Not yet implemented")
+end
+
 return M
