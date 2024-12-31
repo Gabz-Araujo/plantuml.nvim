@@ -2,6 +2,10 @@
 
 A Neovim plugin for rendering PlantUML diagrams directly within your editor.
 
+## Demo
+
+![plant_uml](https://github.com/user-attachments/assets/80669717-e29e-4bb0-9316-8094812ac505)
+
 ## Features
 
 - Render PlantUML diagrams in various formats (PNG, SVG, EPS, PDF, LaTeX, TXT, HTML, UTXT, XMI)
