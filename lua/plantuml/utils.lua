@@ -62,11 +62,9 @@ local api = vim.api
 function M.update_or_create_buffer(result)
 	vim.schedule(function()
 		if output_bufnr and api.nvim_buf_is_valid(output_bufnr) then
-			-- Update existing buffer
 			local lines = vim.split(result.content, "\n")
 			api.nvim_buf_set_lines(output_bufnr, 0, -1, false, lines)
 		else
-			-- Create new buffer
 			output_bufnr = api.nvim_create_buf(false, true)
 			vim.bo[output_bufnr].buftype = "nofile"
 			vim.bo[output_bufnr].bufhidden = "wipe"
