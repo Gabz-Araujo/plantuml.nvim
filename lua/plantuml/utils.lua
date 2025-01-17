@@ -56,4 +56,95 @@ function M.get_current_directory()
 	return result
 end
 
+local output_bufnr = nil
+local api = vim.api
+
+function M.update_or_create_buffer(result)
+	vim.schedule(function()
+		if output_bufnr and api.nvim_buf_is_valid(output_bufnr) then
+			-- Update existing buffer
+			local lines = vim.split(result.content, "\n")
+			api.nvim_buf_set_lines(output_bufnr, 0, -1, false, lines)
+		else
+			-- Create new buffer
+			output_bufnr = api.nvim_create_buf(false, true)
+			vim.bo[output_bufnr].buftype = "nofile"
+			vim.bo[output_bufnr].bufhidden = "wipe"
+			vim.bo[output_bufnr].swapfile = false
+			api.nvim_buf_set_name(output_bufnr, "PlantUML Output")
+
+			local lines = vim.split(result.content, "\n")
+			api.nvim_buf_set_lines(output_bufnr, 0, -1, false, lines)
+			vim.bo[output_bufnr].filetype = "plantuml"
+
+			vim.cmd("vsplit")
+			api.nvim_win_set_buf(0, output_bufnr)
+		end
+	end)
+end
+
+function M.clear_output_buffer()
+	if output_bufnr and api.nvim_buf_is_valid(output_bufnr) then
+		api.nvim_buf_delete(output_bufnr, { force = true })
+	end
+	output_bufnr = nil
+end
+
+-- Loading utils
+
+local spinner_frames = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
+local spinner_index = 1
+local loading_notification = nil
+local timer = nil
+
+local function update_spinner()
+	if loading_notification then
+		spinner_index = (spinner_index % #spinner_frames) + 1
+		loading_notification =
+			vim.notify("Rendering PlantUML diagram... " .. spinner_frames[spinner_index], vim.log.levels.INFO, {
+				id = "plantuml_loading",
+				hide_from_history = true,
+			})
+	else
+		if timer then
+			timer:stop()
+		end
+	end
+end
+
+function M.start_loading_indicator()
+	if loading_notification then
+		return
+	end
+	spinner_index = 1
+	loading_notification =
+		vim.notify("Rendering PlantUML diagram... " .. spinner_frames[spinner_index], vim.log.levels.INFO, {
+			id = "plantuml_loading",
+			hide_from_history = true,
+		})
+	timer = vim.loop.new_timer()
+	timer:start(
+		0,
+		100,
+		vim.schedule_wrap(function()
+			update_spinner()
+		end)
+	)
+end
+
+function M.stop_loading_indicator()
+	if timer then
+		timer:stop()
+		timer:close()
+		timer = nil
+	end
+
+	if loading_notification then
+		vim.notify("PlantUML diagram rendered", vim.log.levels.INFO, {
+			id = "plantuml_loading",
+		})
+		loading_notification = nil
+	end
+end
+
 return M

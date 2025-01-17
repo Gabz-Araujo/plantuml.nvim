@@ -9,6 +9,8 @@ local finders = require("plantuml.finders")
 --- @param format string|nil Output format (optional)
 --- @param callback function Callback function with render result
 function M.render_plantuml(format, callback)
+	utils.start_loading_indicator()
+
 	local ft = vim.bo.filetype
 	local block, err = finders.find_plantuml_block()
 	if not block then
@@ -82,6 +84,8 @@ function M.render_plantuml(format, callback)
 			is_image = is_image,
 			filetype = ft,
 		}
+
+		utils.stop_loading_indicator()
 
 		if callback then
 			callback(render_result)

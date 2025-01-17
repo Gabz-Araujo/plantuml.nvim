@@ -39,7 +39,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 {
   'Gabz-Araujo/plantuml.nvim',
-  dependencies = 'nvim-lua/plenary.nvim',
+  dependencies = { 'nvim-lua/plenary.nvim', 'folke/snacks-nvim' },
   config = function()
     require('plantuml').setup()
   end
@@ -65,6 +65,7 @@ require('plantuml').setup({
 
 - `:PlantUMLRender [format]`: Render the PlantUML diagram under the cursor and insert it into the document. Optionally specify the output format.
 - `:PlantUMLDisplay [format]`: Render the PlantUML diagram under the cursor and display it in a new buffer (not yet implemented).
+- `:PlantUMLLivePreview [format]`: Opens a vsplit with the output and update the graph on save. (Only accept txt or utxt)
 
 ### Supported Formats
 
@@ -115,16 +116,14 @@ Some ideas that i want to Implement/improv:
 
 1. Implement the `display_image_in_buffer` function in `inserters.lua` to allow viewing rendered diagrams in a new buffer.
 2. Add support for more file types (e.g., AsciiDoc, reStructuredText).
-3. Implement caching to avoid re-rendering unchanged diagrams.
+3. <s>Implement caching to avoid re-rendering unchanged diagrams.</s> (Implemented on the live
+   preview)
 4. Add error handling and more informative error messages.
 5. Create keybindings for common operations.
 6. Add support for custom PlantUML themes.
-7. Implement live preview functionality.
+7. <s>Implement live preview functionality.</s> (On save only for text outputs)
 8. Add support for including external files in PlantUML diagrams.
 9. Create documentation for Vim help system.
 10. Add CI/CD pipeline for automated testing and releases.
 11. Implement a command to open the rendered image in the default system viewer.
-12. Add support for PlantUML server rendering as an alternative to local rendering.
-13. Implement syntax highlighting for PlantUML blocks in supported file types.
-14. Add an option to automatically render diagrams on save.
-15. Create a gallery of example renderings in the README.
+12. <s>Add an option to automatically render diagrams on save.</s>
